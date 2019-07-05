@@ -88,7 +88,7 @@ class Reminders(Skill):
 
         await self.opsdroid.memory.put('reminders', reminders)
 
-    @match_regex(r'remind me of ([\w+|\d+\s+]+) ((in|tomorrow|next|today).*)')
+    @match_regex(r'remind me of ([\w+|\d+\s+]+) ((in|tomorrow|next|today).*)', case_sensitive=False)
     async def remind_of(self, message):
         """Handle reminders logic"""
         reminders = await self.opsdroid.memory.get('reminders')
@@ -140,8 +140,11 @@ class Reminders(Skill):
     async def trigger_daily_reminder(self, message):
         """Trigger get reminders at midnight of everyday"""
         reminders = await self.opsdroid.memory.get('reminders')
+        connector = self.opsdroid.default_connector
+        room = connector.default_target
+        message = Message("", None, room, connector)
 
-        if self.today.date() in reminders.key():
+        if self.today.date() in reminders.keys():
 
             await message.respond(
                 "I've found a reminder for today: \n\n -{reminder}".format(
@@ -150,5 +153,3 @@ class Reminders(Skill):
             del reminders[str(self.today.date())]
 
             await self.opsdroid.memory.put('reminders', reminders)
-
-
